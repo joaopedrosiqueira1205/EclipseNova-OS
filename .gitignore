@@ -1,0 +1,28 @@
+# SolarNexum OS
+
+# Imagens e builds gerados
+*.iso
+*.img
+*.qcow2
+*.vdi
+*.vmdk
+
+# Diretórios temporários de compilação
+build/output/
+build/temp/
+
+# Root filesystem gerado
+rootfs/*
+
+# Arquivos temporários
+*.tmp
+*.log
+*.bak
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editores
+.vscode/
+.idea/
