@@ -39,7 +39,7 @@ fi
 : "${LFS_TGT:?ERRO: LFS_TGT nao definido}"
 : "${BUILD_JOBS:?ERRO: BUILD_JOBS nao definido}"
 
-SOURCE="$LFS/sources/findutils-4.10.0"
+SOURCE="$LFS/sources/findutils-4.11.0"
 
 if [ ! -d "$SOURCE" ]; then
     echo "[ERRO] Fontes do Findutils nao encontradas:"
