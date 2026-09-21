@@ -2,150 +2,104 @@
 
 import tkinter as tk
 
-THEME_SOL = {
-    "background": "#e8d7a5",
-    "panel": "#d1b979",
-    "text": "#302817",
-    "accent": "#b88a24",
-    "symbol": "☀"
-}
+from core.theme import (
+    THEME_SOL,
+    THEME_LUA,
+    load_theme,
+    save_theme
+)
 
-THEME_LUA = {
-    "background": "#10182b",
-    "panel": "#182440",
-    "text": "#e5e8ef",
-    "accent": "#8ca5c9",
-    "symbol": "☾"
-}
+from components.sidebar import create_sidebar
+from components.dock import create_dock
+from components.topbar import create_topbar
 
-theme = THEME_SOL
+
+current_theme = load_theme()
 
 
 def change_theme():
-    global theme
+    global current_theme
 
-    if theme == THEME_SOL:
-        theme = THEME_LUA
+    if current_theme["name"] == "Sol":
+        current_theme = THEME_LUA
     else:
-        theme = THEME_SOL
+        current_theme = THEME_SOL
 
-    apply_theme()
+    save_theme(current_theme)
+    rebuild_interface()
 
 
-def apply_theme():
-    root.configure(bg=theme["background"])
-    sidebar.configure(bg=theme["panel"])
-    dock.configure(bg=theme["panel"])
+def rebuild_interface():
+    for widget in root.winfo_children():
+        widget.destroy()
 
-    title.configure(
-        bg=theme["panel"],
-        fg=theme["text"]
+    root.configure(
+        bg=current_theme["background"]
     )
 
-    theme_button.configure(
-        text=theme["symbol"],
-        bg=theme["accent"],
-        fg=theme["text"]
+    create_sidebar(
+        root,
+        current_theme
     )
 
-    launcher.configure(
-        text=theme["symbol"],
-        bg=theme["accent"],
-        fg=theme["text"]
+    create_topbar(
+        root,
+        current_theme,
+        change_theme
+    )
+
+    create_dock(
+        root,
+        current_theme,
+        change_theme
+    )
+
+    workspace = tk.Frame(
+        root,
+        bg=current_theme["background"]
+    )
+
+    workspace.pack(
+        fill="both",
+        expand=True
+    )
+
+    welcome = tk.Label(
+        workspace,
+        text="EclipseNova",
+        font=("Serif", 32),
+        bg=current_theme["background"],
+        fg=current_theme["text"]
+    )
+
+    welcome.place(
+        relx=0.5,
+        rely=0.45,
+        anchor="center"
+    )
+
+    subtitle = tk.Label(
+        workspace,
+        text="Todo ciclo revela um novo horizonte.",
+        font=("Serif", 14),
+        bg=current_theme["background"],
+        fg=current_theme["text"]
+    )
+
+    subtitle.place(
+        relx=0.5,
+        rely=0.53,
+        anchor="center"
     )
 
 
 root = tk.Tk()
 
-root.title("EclipseNova Shell 0.1")
+root.title("EclipseNova Shell 0.3")
+
 root.geometry("1200x700")
+root.minsize(900, 550)
 
-# Painel lateral
-sidebar = tk.Frame(root, width=210)
-sidebar.pack(side="left", fill="y")
-sidebar.pack_propagate(False)
-
-title = tk.Label(
-    sidebar,
-    text="EclipseNova",
-    font=("Serif", 20)
-)
-
-title.pack(pady=30)
-
-menus = [
-    "Início",
-    "Explorar",
-    "Documentos",
-    "Mídia",
-    "Aplicativos",
-    "Configurações",
-    "Terminal",
-    "Rede",
-    "Lixeira"
-]
-
-for menu in menus:
-    button = tk.Button(
-        sidebar,
-        text=menu,
-        relief="flat"
-    )
-
-    button.pack(
-        fill="x",
-        padx=20,
-        pady=4
-    )
-
-# Dock
-dock = tk.Frame(root, height=70)
-dock.pack(side="bottom", fill="x")
-
-dock.pack_propagate(False)
-
-for app in ["⌕", "📁", "🌐", ">_", "⚙"]:
-    button = tk.Button(
-        dock,
-        text=app,
-        font=("Arial", 18),
-        relief="flat"
-    )
-
-    button.pack(
-        side="left",
-        padx=10,
-        pady=10
-    )
-
-# Sol/Lua principal
-launcher = tk.Button(
-    dock,
-    command=change_theme,
-    font=("Arial", 28),
-    relief="flat"
-)
-
-launcher.pack(
-    side="right",
-    padx=20,
-    pady=8
-)
-
-# Seletor superior
-theme_button = tk.Button(
-    root,
-    command=change_theme,
-    font=("Arial", 18),
-    relief="flat"
-)
-
-theme_button.place(
-    relx=0.97,
-    y=20,
-    anchor="ne"
-)
-
-apply_theme()
+rebuild_interface()
 
 root.mainloop()
