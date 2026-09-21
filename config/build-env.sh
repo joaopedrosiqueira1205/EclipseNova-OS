@@ -2,39 +2,38 @@
 
 # ==========================================
 # SolarNexum OS - Build Environment
+# LFS 13.1-systemd
 # ==========================================
 
-# Local onde o SolarNexum sera construido
+# Diretorio onde o SolarNexum sera construido
 export LFS="${LFS:-/mnt/lfs}"
 
 # Arquitetura da cross-toolchain
 export LFS_TGT="$(uname -m)-lfs-linux-gnu"
 
-# Notebook alvo possui 4 GB de RAM.
-# Usamos 1 processo para reduzir o consumo.
+# Compilacao conservadora para notebook com 4 GB RAM
 export BUILD_JOBS="${BUILD_JOBS:-1}"
+export MAKEFLAGS="-j$BUILD_JOBS"
 
 # Diretorios principais
 export SOLARNEXUM_SOURCES="$LFS/sources"
 export SOLARNEXUM_TOOLS="$LFS/tools"
 
-# Priorizar a toolchain temporaria do SolarNexum.
-# Isso permite encontrar comandos como:
-# x86_64-lfs-linux-gnu-gcc
+# Ambiente previsivel para a compilacao
+export LC_ALL=POSIX
+
+# Toolchain temporaria primeiro no PATH
 export PATH="$LFS/tools/bin:/usr/bin:/bin"
 
-# Evitar configuracoes externas interferindo no build
+# Impedir configuracoes do sistema hospedeiro
+# de interferirem na compilacao
 unset CFLAGS
 unset CXXFLAGS
 
-# Configuracao padrao usada por varios pacotes
+# Config.site usado durante as etapas temporarias
 export CONFIG_SITE="$LFS/usr/share/config.site"
 
-# Compilacao conservadora para o notebook de 4 GB
-export MAKEFLAGS="-j$BUILD_JOBS"
-
 echo "[SolarNexum] Ambiente de build carregado"
-echo "LFS:     $LFS"
-echo "Target:  $LFS_TGT"
-echo "Jobs:    $BUILD_JOBS"
-echo "PATH:    $PATH"
+echo "LFS:    $LFS"
+echo "Target: $LFS_TGT"
+echo "Jobs:   $BUILD_JOBS"

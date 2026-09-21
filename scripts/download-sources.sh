@@ -1,37 +1,57 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
+# ==========================================
+# SolarNexum OS - Source Manager
+# Referencia: LFS 13.1-systemd
+# ==========================================
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$PROJECT_ROOT/config/build-env.sh"
+
+LFS_VERSION="13.1-systemd"
+LFS_URL="https://www.linuxfromscratch.org/lfs/downloads/13.1-systemd"
+SOURCE_DIR="$LFS/sources"
+
+if [ "$(uname -s)" != "Linux" ]; then
+    echo "[ERRO] Execute este script somente no Linux."
+    exit 1
+fi
+
+mkdir -pv "$SOURCE_DIR"
+
+echo
 echo "======================================"
-echo " SolarNexum Source Manager 0.1"
+echo " SolarNexum Source Manager"
+echo " LFS $LFS_VERSION"
 echo "======================================"
+echo
 
-SOURCE_DIR="${LFS:-/mnt/lfs}/sources"
-LFS_FILES="https://www.linuxfromscratch.org/lfs/downloads/stable-systemd"
+echo "[1/3] Baixando lista oficial e checksums..."
 
-mkdir -p "$SOURCE_DIR"
+wget -O "$SOURCE_DIR/wget-list" \
+    "$LFS_URL/wget-list"
 
-echo "[1/3] Obtendo lista oficial..."
-wget -O "$SOURCE_DIR/wget-list" "$LFS_FILES/wget-list"
-wget -O "$SOURCE_DIR/md5sums" "$LFS_FILES/md5sums"
+wget -O "$SOURCE_DIR/md5sums" \
+    "$LFS_URL/md5sums"
 
+echo
 echo "[2/3] Baixando fontes..."
+
 wget \
     --input-file="$SOURCE_DIR/wget-list" \
     --continue \
     --directory-prefix="$SOURCE_DIR"
 
+echo
 echo "[3/3] Verificando integridade..."
 
 cd "$SOURCE_DIR"
 
-if md5sum -c md5sums; then
-    echo
-    echo "[OK] Todas as fontes foram verificadas."
-else
-    echo
-    echo "[ERRO] Falha na verificacao das fontes."
-    exit 1
-fi
+md5sum -c md5sums
 
 echo
-echo "SolarNexum Source Manager concluido."
+echo "======================================"
+echo " [OK] Fontes baixadas e verificadas"
+echo "======================================"
