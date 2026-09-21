@@ -5,6 +5,7 @@ set -euo pipefail
 # ==========================================
 # SolarNexum Toolchain
 # GCC 16.2.0 - Pass 1
+# Baseado no LFS 13.1-systemd
 # ==========================================
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -25,8 +26,15 @@ echo " GCC 16.2.0 - Pass 1"
 echo "======================================"
 echo
 
+# Este build deve ser executado no Linux
 if [ "$(uname -s)" != "Linux" ]; then
     echo "[ERRO] Este script precisa ser executado no Linux."
+    exit 1
+fi
+
+# Nao executar esta etapa como root
+if [ "$(id -u)" -eq 0 ]; then
+    echo "[ERRO] Nao execute esta etapa como root."
     exit 1
 fi
 
@@ -39,10 +47,9 @@ BUILD="$SOURCE/build"
 
 MPFR_ARCHIVE="$LFS/sources/mpfr-4.2.2.tar.xz"
 GMP_ARCHIVE="$LFS/sources/gmp-6.3.0.tar.xz"
-MPC_ARCHIVE="$LFS/sources/mpc-1.4.1.tar.gz"
+MPC_ARCHIVE="$LFS/sources/mpc-1.4.1.tar.xz"
 
-# Verificar arquivos necessarios
-
+# Verificar fontes
 if [ ! -d "$SOURCE" ]; then
     echo "[ERRO] Fontes do GCC 16.2.0 nao encontradas:"
     echo "$SOURCE"
@@ -58,33 +65,31 @@ for FILE in "$MPFR_ARCHIVE" "$GMP_ARCHIVE" "$MPC_ARCHIVE"; do
 done
 
 echo "[OK] Fontes encontradas"
+echo "[INFO] Source: $SOURCE"
 echo "[INFO] Target: $LFS_TGT"
 echo "[INFO] Jobs: $BUILD_JOBS"
 echo
 
 cd "$SOURCE"
 
-# Remover restos de uma tentativa anterior
-
+# Limpar restos de preparacoes anteriores
 rm -rf mpfr gmp mpc build
 
 echo "[1/6] Preparando MPFR..."
-
 tar -xf "$MPFR_ARCHIVE"
-mv mpfr-4.2.2 mpfr
+mv -v mpfr-4.2.2 mpfr
 
+echo
 echo "[2/6] Preparando GMP..."
-
 tar -xf "$GMP_ARCHIVE"
-mv gmp-6.3.0 gmp
+mv -v gmp-6.3.0 gmp
 
+echo
 echo "[3/6] Preparando MPC..."
-
 tar -xf "$MPC_ARCHIVE"
-mv mpc-1.4.1 mpc
+mv -v mpc-1.4.1 mpc
 
-# Ajuste necessario em x86_64
-
+# No x86_64, usar lib como diretorio padrao
 case "$(uname -m)" in
     x86_64)
         sed -e '/m64=/s/lib64/lib/' \
@@ -92,6 +97,7 @@ case "$(uname -m)" in
         ;;
 esac
 
+echo
 echo "[4/6] Configurando GCC..."
 
 mkdir -v "$BUILD"
@@ -129,8 +135,7 @@ echo "[6/6] Instalando GCC..."
 
 make install
 
-# Criar limits.h completo necessario para as proximas etapas
-
+# Criar a versao completa do limits.h
 cat ../gcc/limitx.h \
     ../gcc/glimits.h \
     ../gcc/limity.h \
@@ -138,5 +143,5 @@ cat ../gcc/limitx.h \
 
 echo
 echo "======================================"
-echo " [OK] GCC Pass 1 concluido"
+echo " [OK] GCC 16.2.0 Pass 1 concluido"
 echo "======================================"

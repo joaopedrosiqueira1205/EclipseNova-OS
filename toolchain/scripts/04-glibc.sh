@@ -26,7 +26,6 @@ echo "======================================"
 echo
 
 # Verificacoes de seguranca
-
 if [ "$(uname -s)" != "Linux" ]; then
     echo "[ERRO] Este script precisa ser executado no Linux."
     exit 1
@@ -67,7 +66,6 @@ echo "[INFO] Jobs: $BUILD_JOBS"
 echo
 
 # Links do carregador dinamico para x86_64
-
 echo "[1/7] Preparando dynamic linker..."
 
 mkdir -pv "$LFS/lib64"
@@ -81,7 +79,6 @@ ln -sfv ../lib/ld-linux-x86-64.so.2 \
 cd "$SOURCE"
 
 # Aplicar patches
-
 echo
 echo "[2/7] Aplicando patches..."
 
@@ -89,7 +86,6 @@ patch -Np1 -i "$PATCH_FHS"
 patch -Np1 -i "$PATCH_FIXES"
 
 # Build separado
-
 echo
 echo "[3/7] Preparando diretorio de build..."
 
@@ -100,7 +96,6 @@ cd "$BUILD"
 echo "rootsbindir=/usr/sbin" > configparms
 
 # Configuracao
-
 echo
 echo "[4/7] Configurando Glibc..."
 
@@ -109,29 +104,24 @@ echo "[4/7] Configurando Glibc..."
     --host="$LFS_TGT" \
     --build="$(../scripts/config.guess)" \
     --disable-nscd \
-    libc_cv_slibdir=/usr/lib \
-    --enable-kernel=5.10
+    libc_cv_slibdir=/usr/lib
 
 # Compilacao
-
 echo
 echo "[5/7] Compilando Glibc..."
 
 make -j"$BUILD_JOBS"
 
 # Instalacao
-
 echo
 echo "[6/7] Instalando Glibc..."
 
 make DESTDIR="$LFS" install
 
 # Corrigir caminho do loader no ldd
-
 sed '/RTLDLIST=/s@/usr@@g' -i "$LFS/usr/bin/ldd"
 
 # Teste da cross-toolchain
-
 echo
 echo "[7/7] Testando toolchain..."
 
@@ -139,9 +129,7 @@ echo 'int main(){}' | \
     "$LFS_TGT-gcc" -x c - -v -Wl,--verbose \
     &> dummy.log
 
-if ! "$LFS_TGT-readelf" -l a.out |
-    grep -q ': /lib'; then
-
+if ! "$LFS_TGT-readelf" -l a.out | grep -q ': /lib'; then
     echo
     echo "[ERRO] Dynamic linker incorreto."
     rm -f a.out dummy.log
