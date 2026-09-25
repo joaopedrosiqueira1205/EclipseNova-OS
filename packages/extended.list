@@ -1,0 +1,12 @@
+# EclipseNova OS - selected BLFS 13.1 additions
+Linux-PAM 1.7.2
+pciutils 3.15.0
+usbutils 019
+iw 6.17
+wpa_supplicant 2.12
+NetworkManager 1.58.1
+Sudo 1.9.17p2
+OpenSSH 10.5p1
+
+# Desktop intentionally not frozen here.
+# The user will choose/customize the graphical environment before it is added.
